@@ -146,9 +146,15 @@ export async function login(_: unknown, formData: FormData) {
   redirect(homeFor(user.role));
 }
 
+/** Вход одной кнопкой с лендинга: роль выбрана, вводить нечего. */
+export async function quickLogin(formData: FormData) {
+  const result = await login(null, formData);
+  if (result?.error) redirect("/login");
+}
+
 export async function logout() {
   await destroySession();
-  redirect("/");
+  redirect("/login");
 }
 
 const orderInput = z.object({

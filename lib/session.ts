@@ -64,7 +64,7 @@ export const homeFor = (role: schema.Role) => (role === "gate" ? "/gate" : "/ord
  */
 export async function requireUser(...roles: schema.Role[]): Promise<SessionUser> {
   const user = await currentUser();
-  if (!user) redirect("/");
+  if (!user) redirect("/login");
   if (roles.length && !roles.includes(user.role) && user.role !== "admin") redirect(homeFor(user.role));
   return user;
 }

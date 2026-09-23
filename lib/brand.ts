@@ -5,4 +5,5 @@ export const BRAND: Record<Locale, { name: string; tagline: string }> = {
   ru: { name: "Мизон", tagline: "Заявки и отгрузка" },
   tg: { name: "Мизон", tagline: "Дархост ва боркунӣ" },
   en: { name: "Mizon", tagline: "Orders and dispatch" },
+  zh: { name: "Mizon", tagline: "订单与发货" },
 };

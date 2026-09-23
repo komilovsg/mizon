@@ -11,7 +11,7 @@
   --color-go: #12875a;
   --color-info: #2563c9;
 
-  --font-sans: var(--font-manrope), system-ui, sans-serif;
+  --font-sans: var(--font-manrope), "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 
   --radius-card: 16px;
@@ -293,3 +293,10 @@ h1, h2, h3 { font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
 .data-table th { text-align: left; font-size: 0.875rem; font-weight: 600; color: var(--color-muted); padding: 0 0.75rem 0.5rem 0; }
 .data-table td { padding: 0.625rem 0.75rem 0.625rem 0; border-top: 1px solid var(--color-line); }
 .data-table th:last-child, .data-table td:last-child { text-align: right; padding-right: 0; }
+
+/*
+ * Компонентные классы вроде .btn задают display и перебивают утилиту hidden,
+ * из-за чего скрытый элемент остаётся на экране. Возвращаем ей приоритет:
+ * правило вне @layer сильнее любых утилит Tailwind.
+ */
+.hidden { display: none; }

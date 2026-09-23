@@ -8,7 +8,7 @@ export default async function NotFound() {
       <p className="label">404</p>
       <h1 className="title mt-2 text-3xl">{t("notfound.title")}</h1>
       <p className="mt-3 text-muted">{t("notfound.body")}</p>
-      <Link href="/" className="btn btn-primary mt-8 text-center">
+      <Link href="/login" className="btn btn-primary mt-8 text-center">
         {t("error.home")}
       </Link>
     </main>

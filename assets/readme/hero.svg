@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 340" width="1200" height="340" role="img" aria-label="Мизон — заявки и отгрузка. Путь рейса: заявка, въезд, весы, выезд, 1С.">
+  <title>Мизон — заявки и отгрузка. Путь рейса: заявка, въезд, весы, выезд, 1С.</title>
+  <rect width="1200" height="340" rx="28" fill="#F5F6F4"/>
+  <rect x="1" y="1" width="1198" height="338" rx="27" fill="none" stroke="#E3E5E0" stroke-width="2"/>
+
+  <g transform="translate(56 52)">
+    <rect width="64" height="64" rx="14" fill="#171C19"/>
+    <rect x="17" y="12" width="30" height="13" fill="#FFFFFF"/>
+    <rect x="7" y="28" width="50" height="7" fill="#FFFFFF"/>
+    <path d="M32 36 L45 55 L19 55 Z" fill="#FF5A00"/>
+  </g>
+
+  <text x="140" y="84" font-size="46" font-weight="800" fill="#171C19" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">Мизон</text>
+  <text x="140" y="116" font-size="23" font-weight="500" fill="#6B7268" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">Заявки и отгрузка</text>
+
+  <text x="56" y="176" font-size="28" font-weight="600" fill="#171C19" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">Заявка, машина и накладная — в одном месте</text>
+  <text x="56" y="210" font-size="22" fill="#6B7268" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">Отгрузка навалочных грузов через весовую: от звонка дилера до документа в 1С</text>
+
+  <g font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+    <rect x="56" y="236" width="184" height="66" rx="14" fill="#FFFFFF" stroke="#E3E5E0" stroke-width="2"/><text x="148" y="278" text-anchor="middle" font-size="26" font-weight="600" fill="#171C19">Заявка</text><path d="M256 269 H273" stroke="#A8ADA6" stroke-width="2.5" stroke-linecap="round"/><path d="M269 263 L282 269 L269 275" fill="none" stroke="#A8ADA6" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="282" y="236" width="184" height="66" rx="14" fill="#FFFFFF" stroke="#E3E5E0" stroke-width="2"/><text x="374" y="278" text-anchor="middle" font-size="26" font-weight="600" fill="#171C19">Въезд</text><path d="M482 269 H499" stroke="#A8ADA6" stroke-width="2.5" stroke-linecap="round"/><path d="M495 263 L508 269 L495 275" fill="none" stroke="#A8ADA6" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="508" y="236" width="184" height="66" rx="14" fill="#FFFFFF" stroke="#E3E5E0" stroke-width="2"/><text x="600" y="278" text-anchor="middle" font-size="26" font-weight="600" fill="#171C19">Весы</text><path d="M708 269 H725" stroke="#A8ADA6" stroke-width="2.5" stroke-linecap="round"/><path d="M721 263 L734 269 L721 275" fill="none" stroke="#A8ADA6" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="734" y="236" width="184" height="66" rx="14" fill="#FFFFFF" stroke="#E3E5E0" stroke-width="2"/><text x="826" y="278" text-anchor="middle" font-size="26" font-weight="600" fill="#171C19">Выезд</text><path d="M934 269 H951" stroke="#A8ADA6" stroke-width="2.5" stroke-linecap="round"/><path d="M947 263 L960 269 L947 275" fill="none" stroke="#A8ADA6" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><rect x="960" y="236" width="184" height="66" rx="14" fill="#FF5A00" stroke="#FF5A00" stroke-width="2"/><text x="1052" y="278" text-anchor="middle" font-size="26" font-weight="600" fill="#FFFFFF">1С</text>
+  </g>
+</svg>

@@ -9,7 +9,7 @@ import { logout } from "@/app/actions";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await currentUser();
-  if (!user) redirect("/");
+  if (!user) redirect("/login");
   const locale = await getLocale();
   const t = translator(locale);
 

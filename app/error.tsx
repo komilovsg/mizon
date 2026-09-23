@@ -23,7 +23,7 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
         <button onClick={reset} className="btn btn-primary flex-1">
           Повторить
         </button>
-        <a href="/" className="btn flex-1 text-center">
+        <a href="/login" className="btn flex-1 text-center">
           На главную
         </a>
       </div>
