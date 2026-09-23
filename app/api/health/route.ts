@@ -7,7 +7,14 @@ export const dynamic = "force-dynamic";
  * Диагностика подключения к базе — отвечает изнутри самого хостинга.
  * Значений переменных не раскрывает: только видит их приложение или нет.
  */
-export async function GET() {
+export async function GET(req: Request) {
+  // На стенде открыт, чтобы диагностировать без лишних движений.
+  // Задайте HEALTH_TOKEN — и эндпоинт закроется, не меняя кода.
+  const guard = process.env.HEALTH_TOKEN?.trim();
+  if (guard && req.headers.get("authorization") !== `Bearer ${guard}`) {
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  }
+
   const url = process.env.TURSO_DATABASE_URL?.trim();
   const token = process.env.TURSO_AUTH_TOKEN?.trim();
 
