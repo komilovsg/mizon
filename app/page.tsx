@@ -15,6 +15,8 @@ const DEMO = [
 
 export default async function LoginPage() {
   if (await currentUser()) redirect("/orders");
+  // На публичном стенде подсказку с телефонами и PIN лучше не печатать на входе.
+  const showDemo = process.env.SHOW_DEMO_LOGINS === "1";
   const locale = await getLocale();
   const t = translator(locale);
 
@@ -44,17 +46,19 @@ export default async function LoginPage() {
             {t("login.register")}
           </Link>
 
-          <div className="mt-8 border-t border-line pt-4">
-            <p className="label mb-2">{t("login.demo")} · PIN 1111</p>
-            <ul className="mono space-y-1 text-sm text-muted">
-              {DEMO.map((d) => (
-                <li key={d.phone} className="flex justify-between gap-4">
-                  <span className="font-sans">{t(d.role)}</span>
-                  <span>{d.phone}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {showDemo && (
+            <div className="mt-8 border-t border-line pt-4">
+              <p className="label mb-2">{t("login.demo")} · PIN 1111</p>
+              <ul className="mono space-y-1 text-sm text-muted">
+                {DEMO.map((d) => (
+                  <li key={d.phone} className="flex justify-between gap-4">
+                    <span className="font-sans">{t(d.role)}</span>
+                    <span>{d.phone}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         {/* Показываем то, ради чего заходят: одну заявку и машины по ней. */}
