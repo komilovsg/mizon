@@ -11,7 +11,8 @@
     "db:seed": "tsx lib/db/seed.ts",
     "db:studio": "drizzle-kit studio",
     "db:demo": "tsx lib/db/demo.ts",
-    "db:check": "tsx lib/db/check.ts"
+    "db:check": "tsx lib/db/check.ts",
+    "db:setup": "drizzle-kit push && tsx lib/db/seed.ts && tsx lib/db/demo.ts && tsx lib/db/check.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",
