@@ -4,7 +4,7 @@ import { dealers, orders, products, trips, users } from "./schema";
 
 /** Куда смотрим и что там лежит. Запускать с теми же переменными, что у Vercel. */
 async function main() {
-  const target = process.env.TURSO_DATABASE_URL ?? `file:${process.env.DB_FILE ?? "./data.db"}`;
+  const target = process.env.TURSO_DATABASE_URL?.trim() || `file:${process.env.DB_FILE?.trim() || "./data.db"}`;
   console.log(`База: ${target}`);
   console.log(target.startsWith("file:") ? "⚠ Это локальный файл. На Vercel он не переживёт деплой.\n" : "");
 
