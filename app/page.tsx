@@ -13,10 +13,13 @@ const DEMO = [
   { role: "role.scale", phone: "+992900000004" },
 ] as const;
 
+const DEMO_PIN = "1111";
+
 export default async function LoginPage() {
   if (await currentUser()) redirect("/orders");
-  // На публичном стенде подсказку с телефонами и PIN лучше не печатать на входе.
-  const showDemo = process.env.SHOW_DEMO_LOGINS === "1";
+  // Стенд существует, чтобы его тыкали, поэтому вход в один клик открыт по умолчанию.
+  // Выключается явно: SHOW_DEMO_LOGINS=0 — понадобится, когда контур станет боевым.
+  const showDemo = process.env.SHOW_DEMO_LOGINS !== "0";
   const locale = await getLocale();
   const t = translator(locale);
 
@@ -37,7 +40,14 @@ export default async function LoginPage() {
         <div className="order-1 w-full max-w-sm lg:order-2 lg:justify-self-end">
           <h1 className="title mb-5 text-3xl">{t("login.title")}</h1>
           <LoginForm
-            labels={{ phone: t("login.phone"), pin: t("login.pin"), submit: t("login.submit"), error: t("login.error") }}
+            labels={{
+              phone: t("login.phone"),
+              pin: t("login.pin"),
+              submit: t("login.submit"),
+              error: t("login.error"),
+              demo: `${t("login.demo")} · PIN ${DEMO_PIN}`,
+            }}
+            demo={showDemo ? DEMO.map((d) => ({ label: t(d.role), phone: d.phone, pin: DEMO_PIN })) : []}
           />
           <Link
             href="/register"
@@ -46,19 +56,7 @@ export default async function LoginPage() {
             {t("login.register")}
           </Link>
 
-          {showDemo && (
-            <div className="mt-8 border-t border-line pt-4">
-              <p className="label mb-2">{t("login.demo")} · PIN 1111</p>
-              <ul className="mono space-y-1 text-sm text-muted">
-                {DEMO.map((d) => (
-                  <li key={d.phone} className="flex justify-between gap-4">
-                    <span className="font-sans">{t(d.role)}</span>
-                    <span>{d.phone}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+
         </div>
 
         {/* Показываем то, ради чего заходят: одну заявку и машины по ней. */}
