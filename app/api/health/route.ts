@@ -12,7 +12,9 @@ export async function GET() {
   const token = process.env.TURSO_AUTH_TOKEN?.trim();
 
   const env = {
-    TURSO_DATABASE_URL: url ? `задан, ${url.length} символов, начинается с ${url.slice(0, 8)}…` : "ПУСТО",
+    // Адрес базы не секрет: без токена он бесполезен, а видеть его нужно,
+    // чтобы не гадать, к какой именно базе подключён хостинг.
+    TURSO_DATABASE_URL: url ? `${url} (${url.length} символов)` : "ПУСТО",
     TURSO_AUTH_TOKEN: token ? `задан, ${token.length} символов` : "ПУСТО",
     SESSION_SECRET: process.env.SESSION_SECRET?.trim() ? "задан" : "ПУСТО — сессии на значении по умолчанию",
     runtime: process.env.VERCEL ? "vercel" : "локально",
