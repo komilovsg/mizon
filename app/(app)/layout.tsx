@@ -21,17 +21,22 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     { href: "/dealers", label: t("nav.dealers"), roles: ["dispatcher", "admin"] },
   ].filter((l) => l.roles.includes(user.role));
 
-  // Дилеру внизу нужна не навигация, а сама кнопка «новая заявка» — ради неё он и заходит.
-
+  /*
+   * У дилера на экране должны остаться только кнопка и его заявки.
+   * Поэтому шапка сведена к названию и выходу, а переключатель языка убран вниз:
+   * язык выбирают один раз, а место вверху он занимал каждый раз.
+   */
+  const isDealer = user.role === "dealer";
 
   return (
-    <div className="min-h-dvh">
+    <div className="flex min-h-dvh flex-col">
       <header className="no-print sticky top-0 z-10 border-b border-line bg-bg/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center gap-x-5 px-4 py-2.5 sm:px-5 sm:py-3">
           <Link href={links[0]?.href ?? "/orders"} className="flex items-center gap-2">
             <img src="/icon.svg" alt="" width={28} height={28} className="rounded-lg" />
             <span className="title text-xl">{BRAND[locale].name}</span>
           </Link>
+
           {/* На телефоне разделы уезжают в нижнюю панель — до верха экрана рука не дотягивается. */}
           <nav className="hidden gap-4 md:flex">
             {links.map((l) => (
@@ -40,12 +45,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               </Link>
             ))}
           </nav>
-          <span className="label ml-auto hidden truncate lg:inline">
-            {user.name}
-            {user.dealerName ? ` · ${user.dealerName}` : ""}
-          </span>
+
+          {!isDealer && (
+            <span className="label ml-auto hidden truncate lg:inline">
+              {user.name}
+              {user.dealerName ? ` · ${user.dealerName}` : ""}
+            </span>
+          )}
+
           <div className="ml-auto flex items-center gap-2 lg:ml-3">
-            <LangSwitch current={locale} />
+            {!isDealer && <LangSwitch current={locale} />}
             <form action={logout}>
               <button className="label px-2 py-2 hover:text-ink">{t("logout")}</button>
             </form>
@@ -53,7 +62,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </header>
 
-      <main className="has-tabbar mx-auto max-w-6xl px-4 py-6 sm:px-5 sm:py-8">{children}</main>
+      <main className="has-tabbar mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-5 sm:py-8">{children}</main>
+
+      {isDealer && (
+        <footer className="no-print mx-auto w-full max-w-6xl px-4 pb-8 sm:px-5">
+          <LangSwitch current={locale} />
+        </footer>
+      )}
 
       {links.length > 1 && <TabBar tabs={links.map(({ href, label }) => ({ href, label }))} />}
     </div>
