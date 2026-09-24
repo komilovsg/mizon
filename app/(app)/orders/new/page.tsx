@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { asc, eq } from "drizzle-orm";
 import { db, schema } from "@/lib/db";
 import { requireUser } from "@/lib/session";
@@ -12,20 +11,15 @@ import { TonsInput } from "@/components/tons-input";
 export const dynamic = "force-dynamic";
 
 export default async function NewOrderPage() {
-  const user = await requireUser("dealer", "dispatcher");
+  await requireUser();
   const t = translator(await getLocale());
-  const isDealer = user.role === "dealer";
 
-  if (isDealer) {
-    const own = user.dealerId
-      ? await db.query.dealers.findFirst({ where: eq(schema.dealers.id, user.dealerId) })
-      : null;
-    if (own?.status !== "active") redirect("/orders");
-  }
-
-  const dealers = isDealer
-    ? []
-    : await db.select().from(schema.dealers).where(eq(schema.dealers.status, "active"));
+  // Подсказки, чтобы «ООО Сомон» и «ООО Сомон Строй» не разъехались в два контрагента.
+  const dealers = await db
+    .select({ name: schema.dealers.name })
+    .from(schema.dealers)
+    .where(eq(schema.dealers.status, "active"))
+    .orderBy(asc(schema.dealers.name));
   const products = await db
     .select()
     .from(schema.products)
@@ -38,7 +32,6 @@ export default async function NewOrderPage() {
         ← {t("back")}
       </Link>
       <h1 className="title mt-3 text-3xl">{t("nav.new")}</h1>
-      {!isDealer && <p className="mt-1 text-muted">{t("order.channel.phone")}</p>}
 
       <form action={createOrder} className="card mt-5 space-y-6 p-5 sm:p-6">
         {/* Дата проставляется сама — показываем, чтобы дилер видел, что она в заявке есть. */}
@@ -59,32 +52,22 @@ export default async function NewOrderPage() {
 
         <TonsInput label={t("order.tons")} unit={t("t")} />
 
-        {isDealer ? (
-          <Field label={t("order.contact")}>
-            <input
-              name="contactName"
-              required
-              maxLength={120}
-              autoComplete="name"
-              defaultValue={user.name}
-              className="field"
-            />
-            <span className="label mt-1 block">{t("order.contact.hint")}</span>
-          </Field>
-        ) : (
-          <Field label={t("order.dealer")}>
-            <select name="dealerId" required className="field" defaultValue="">
-              <option value="" disabled>
-                {t("order.dealerPick")}
-              </option>
-              {dealers.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
-          </Field>
-        )}
+        <Field label={t("order.contact")}>
+          <input
+            name="contactName"
+            required
+            maxLength={120}
+            list="known-dealers"
+            autoComplete="off"
+            className="field"
+          />
+          <datalist id="known-dealers">
+            {dealers.map((d) => (
+              <option key={d.name} value={d.name} />
+            ))}
+          </datalist>
+          <span className="label mt-1 block">{t("order.contact.hint")}</span>
+        </Field>
 
         <Field label={t("order.destination")}>
           <input name="destination" required maxLength={300} className="field" placeholder="Рӯдакӣ, склад «Сомон»" />
@@ -96,7 +79,7 @@ export default async function NewOrderPage() {
           <legend className="title text-lg">{t("order.truck")}</legend>
 
           <Field label={t("trip.driver")}>
-            <input name="driverName" required={isDealer} maxLength={120} autoComplete="name" className="field" />
+            <input name="driverName" required maxLength={120} autoComplete="name" className="field" />
           </Field>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -106,7 +89,7 @@ export default async function NewOrderPage() {
             <Field label={t("trip.plate")}>
               <input
                 name="plate"
-                required={isDealer}
+                required
                 maxLength={20}
                 autoCapitalize="characters"
                 autoCorrect="off"
@@ -117,12 +100,6 @@ export default async function NewOrderPage() {
             </Field>
           </div>
         </fieldset>
-
-        {!isDealer && (
-          <Field label={t("order.note")}>
-            <textarea name="note" rows={2} maxLength={500} className="field" />
-          </Field>
-        )}
 
         <button className="btn btn-brand btn-xl">{t("order.create")}</button>
       </form>

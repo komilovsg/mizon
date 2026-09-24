@@ -4,7 +4,6 @@ import { requireUser } from "@/lib/session";
 import { getLocale, translator } from "@/lib/i18n";
 import { fmtDateTime } from "@/lib/format";
 import { Badge, dealerTone } from "@/components/ui";
-import { AddDealerForm } from "@/components/add-dealer-form";
 import { setDealerStatus } from "@/app/actions";
 
 export const dynamic = "force-dynamic";
@@ -29,19 +28,6 @@ export default async function DealersPage() {
   return (
     <>
       <h1 className="title mb-6 text-2xl sm:text-3xl">{t("nav.dealers")}</h1>
-
-      <AddDealerForm
-        labels={{
-          company: t("reg.company"),
-          inn: t("reg.inn"),
-          contact: t("reg.contact"),
-          phone: t("reg.phone"),
-          submit: t("dealer.add"),
-          added: t("dealer.added"),
-          taken: t("reg.taken"),
-          invalid: t("login.error"),
-        }}
-      />
 
       {rows.length === 0 && <p className="mt-8 text-muted">{t("dealer.empty")}</p>}
 

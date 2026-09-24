@@ -3,11 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { randomInt } from "node:crypto";
 import { and, eq, gte, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db, schema } from "@/lib/db";
-import { createSession, destroySession, homeFor, requireUser, type SessionUser } from "@/lib/session";
+import { requireUser, type SessionUser } from "@/lib/session";
 import { enqueue } from "@/lib/onec";
 import { normalizePlate, orderNumber } from "@/lib/format";
 import { LOCALES, type Locale } from "@/lib/i18n";
@@ -26,139 +25,8 @@ export async function setLocale(formData: FormData) {
   revalidatePath("/", "layout");
 }
 
-const registerInput = z.object({
-  name: z.string().min(2).max(200),
-  inn: z.string().max(30).optional(),
-  contact: z.string().min(3).max(120),
-  phone: z.string().min(6).max(30),
-  pin: z.string().regex(/^\d{4}$/),
-});
-
-/**
- * Самозапись дилера. Создаёт контрагента со статусом pending: войти он сможет
- * сразу, а создавать заявки — только после того, как диспетчер откроет доступ.
- * В 1С отсюда ничего не уходит.
- */
-export async function registerDealer(_: unknown, formData: FormData) {
-  const parsed = registerInput.safeParse({
-    name: formData.get("name"),
-    inn: formData.get("inn") || undefined,
-    contact: formData.get("contact"),
-    phone: formData.get("phone"),
-    pin: formData.get("pin"),
-  });
-  if (!parsed.success) return { error: "invalid" as const };
-  const input = parsed.data;
-
-  const taken = await db.query.users.findFirst({ where: eq(schema.users.phone, input.phone) });
-  if (taken) return { error: "taken" as const };
-
-  const [dealer] = await db
-    .insert(schema.dealers)
-    .values({ name: input.name, inn: input.inn ?? null, phone: input.phone, status: "pending" })
-    .returning();
-  await db
-    .insert(schema.users)
-    .values({ name: input.contact, phone: input.phone, pin: input.pin, role: "dealer", dealerId: dealer.id });
-
-  return { ok: true as const };
-}
-
-const dealerInput = registerInput.omit({ pin: true });
-
-/** Диспетчер заводит дилера, который позвонил: доступ открыт сразу, PIN он диктует по телефону. */
-export async function addDealer(_: unknown, formData: FormData) {
-  const user = await requireUser("dispatcher");
-  const parsed = dealerInput.safeParse({
-    name: formData.get("name"),
-    inn: formData.get("inn") || undefined,
-    contact: formData.get("contact"),
-    phone: formData.get("phone"),
-  });
-  if (!parsed.success) return { error: "invalid" as const };
-  const input = parsed.data;
-
-  const taken = await db.query.users.findFirst({ where: eq(schema.users.phone, input.phone) });
-  if (taken) return { error: "taken" as const };
-
-  const pin = String(randomInt(1000, 10000));
-  const [dealer] = await db
-    .insert(schema.dealers)
-    .values({
-      name: input.name,
-      inn: input.inn ?? null,
-      phone: input.phone,
-      status: "active",
-      approvedBy: user.id,
-      approvedAt: now(),
-    })
-    .returning();
-  await db
-    .insert(schema.users)
-    .values({ name: input.contact, phone: input.phone, pin, role: "dealer", dealerId: dealer.id });
-
-  await log(user, "dealer", dealer.id, "created");
-  await enqueueDealer(dealer.id);
-  revalidatePath("/dealers");
-  return { ok: true as const, phone: input.phone, pin };
-}
-
-async function enqueueDealer(dealerId: number) {
-  const dealer = await db.query.dealers.findFirst({ where: eq(schema.dealers.id, dealerId) });
-  if (!dealer) return;
-  await enqueue("dealer.approved", {
-    dealerId: dealer.id,
-    name: dealer.name,
-    inn: dealer.inn,
-    phone: dealer.phone,
-  });
-}
-
-export async function setDealerStatus(formData: FormData) {
-  const user = await requireUser("dispatcher");
-  const id = Number(formData.get("dealerId"));
-  const status = String(formData.get("status")) as schema.DealerStatus;
-  if (!schema.DEALER_STATUS.includes(status)) throw new Error("Неизвестный статус");
-
-  await db
-    .update(schema.dealers)
-    .set({
-      status,
-      approvedBy: status === "active" ? user.id : undefined,
-      approvedAt: status === "active" ? now() : undefined,
-    })
-    .where(eq(schema.dealers.id, id));
-  await log(user, "dealer", id, status);
-
-  // Контрагент уходит в 1С только после одобрения и только один раз.
-  const dealer = await db.query.dealers.findFirst({ where: eq(schema.dealers.id, id) });
-  if (status === "active" && dealer && !dealer.code1c) await enqueueDealer(id);
-
-  revalidatePath("/dealers");
-}
-
-export async function login(_: unknown, formData: FormData) {
-  const phone = String(formData.get("phone") ?? "").trim();
-  const pin = String(formData.get("pin") ?? "").trim();
-  const user = await db.query.users.findFirst({ where: eq(schema.users.phone, phone) });
-  if (!user || !user.active || user.pin !== pin) return { error: true };
-  await createSession(user.id);
-  redirect(homeFor(user.role));
-}
-
-/** Вход одной кнопкой с лендинга: роль выбрана, вводить нечего. */
-export async function quickLogin(formData: FormData) {
-  const result = await login(null, formData);
-  if (result?.error) redirect("/login");
-}
-
-export async function logout() {
-  await destroySession();
-  redirect("/login");
-}
-
 const orderInput = z.object({
-  dealerId: z.coerce.number().int().positive(),
+  dealerId: z.coerce.number().int().positive().optional(),
   productId: z.coerce.number().int().positive(),
   tons: z.coerce.number().int().min(1).max(500),
   destination: z.string().min(3).max(300),
@@ -177,10 +45,28 @@ const orderTruckInput = z.object({
   driverName: z.string().max(120).optional(),
 });
 
+/**
+ * Логина нет, поэтому «от кого» приходит строкой.
+ * Уже знакомого контрагента находим по имени, нового заводим сразу —
+ * иначе справочник пришлось бы вести руками до каждой заявки.
+ */
+async function resolveDealer(name?: string): Promise<number | null> {
+  const clean = name?.trim();
+  if (!clean) return null;
+
+  const found = await db.query.dealers.findFirst({
+    where: sql`lower(trim(${schema.dealers.name})) = lower(${clean})`,
+  });
+  if (found) return found.id;
+
+  const [created] = await db.insert(schema.dealers).values({ name: clean, status: "active" }).returning();
+  return created.id;
+}
+
 export async function createOrder(formData: FormData) {
   const user = await requireUser("dealer", "dispatcher");
   const input = orderInput.parse({
-    dealerId: user.role === "dealer" ? user.dealerId : formData.get("dealerId"),
+    dealerId: user.role === "dealer" ? user.dealerId : formData.get("dealerId") || undefined,
     productId: formData.get("productId"),
     tons: formData.get("tons"),
     destination: formData.get("destination"),
@@ -196,8 +82,10 @@ export async function createOrder(formData: FormData) {
   const product = await db.query.products.findFirst({ where: eq(schema.products.id, input.productId) });
   if (!product) throw new Error("Позиция номенклатуры не найдена");
 
-  const dealer = await db.query.dealers.findFirst({ where: eq(schema.dealers.id, input.dealerId) });
-  if (dealer?.status !== "active") throw new Error("Доступ дилера ещё не открыт");
+  const dealerId = input.dealerId ?? (await resolveDealer(input.contactName));
+  if (!dealerId) throw new Error("Не указано, от кого заявка");
+  const dealer = await db.query.dealers.findFirst({ where: eq(schema.dealers.id, dealerId) });
+  if (dealer?.status === "blocked") throw new Error("Дилер заблокирован");
 
   const midnight = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000);
   const [{ count }] = await db
@@ -209,6 +97,7 @@ export async function createOrder(formData: FormData) {
     .insert(schema.orders)
     .values({
       ...input,
+      dealerId,
       product: product.name,
       contactName: input.contactName ?? user.name,
       note: input.note ?? null,
@@ -239,7 +128,7 @@ export async function createOrder(formData: FormData) {
   }
 
   if (order.status === "approved") await enqueueOrder(order.id);
-  redirect(`/orders/${order.id}${user.role === "dealer" ? "?created=1" : ""}`);
+  redirect(`/orders/${order.id}?created=1`);
 }
 
 async function enqueueOrder(orderId: number) {
@@ -257,6 +146,37 @@ async function enqueueOrder(orderId: number) {
     tons: order.tons,
     destination: order.destination,
   });
+}
+
+/** Справочник контрагентов: заблокированному заявки создавать нельзя. */
+export async function setDealerStatus(formData: FormData) {
+  const user = await requireUser("dispatcher");
+  const id = Number(formData.get("dealerId"));
+  const status = String(formData.get("status")) as schema.DealerStatus;
+  if (!schema.DEALER_STATUS.includes(status)) throw new Error("Неизвестный статус");
+
+  await db
+    .update(schema.dealers)
+    .set({
+      status,
+      approvedBy: status === "active" ? user.id : undefined,
+      approvedAt: status === "active" ? now() : undefined,
+    })
+    .where(eq(schema.dealers.id, id));
+  await log(user, "dealer", id, status);
+
+  // Контрагент уходит в 1С только после одобрения и только один раз.
+  const dealer = await db.query.dealers.findFirst({ where: eq(schema.dealers.id, id) });
+  if (status === "active" && dealer && !dealer.code1c) {
+    await enqueue("dealer.approved", {
+      dealerId: dealer.id,
+      name: dealer.name,
+      inn: dealer.inn,
+      phone: dealer.phone,
+    });
+  }
+
+  revalidatePath("/dealers");
 }
 
 export async function decideOrder(formData: FormData) {

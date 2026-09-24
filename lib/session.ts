@@ -39,11 +39,36 @@ export async function destroySession() {
 
 export type SessionUser = typeof schema.users.$inferSelect & { dealerName: string | null };
 
+/**
+ * Программа работает внутри завода, поэтому входа в ней нет.
+ * Все действия пишутся на одного служебного пользователя, а кто именно
+ * оставил заявку — видно из поля «От кого» в самой заявке.
+ */
+export const SYSTEM_PHONE = "system";
+
+async function systemUser(): Promise<SessionUser> {
+  const found = await db.query.users.findFirst({ where: eq(schema.users.phone, SYSTEM_PHONE) });
+  if (found) return { ...found, dealerName: null };
+
+  // Первые запросы после чистой установки приходят пачкой и создают его наперегонки,
+  // поэтому дубль по телефону — не ошибка, а сигнал, что кто-то успел раньше.
+  const [created] = await db
+    .insert(schema.users)
+    .values({ name: "Завод", phone: SYSTEM_PHONE, pin: "-", role: "admin" })
+    .onConflictDoNothing({ target: schema.users.phone })
+    .returning();
+  if (created) return { ...created, dealerName: null };
+
+  const existing = await db.query.users.findFirst({ where: eq(schema.users.phone, SYSTEM_PHONE) });
+  if (!existing) throw new Error("Не удалось завести служебного пользователя");
+  return { ...existing, dealerName: null };
+}
+
 export async function currentUser(): Promise<SessionUser | null> {
   const raw = (await cookies()).get(COOKIE)?.value;
-  if (!raw) return null;
+  if (!raw) return systemUser();
   const id = verify(raw);
-  if (!id) return null;
+  if (!id) return systemUser();
   const rows = await db
     .select({ u: schema.users, dealerName: schema.dealers.name })
     .from(schema.users)
@@ -51,7 +76,7 @@ export async function currentUser(): Promise<SessionUser | null> {
     .where(eq(schema.users.id, id))
     .limit(1);
   const row = rows[0];
-  if (!row || !row.u.active) return null;
+  if (!row || !row.u.active) return systemUser();
   return { ...row.u, dealerName: row.dealerName ?? null };
 }
 
@@ -64,7 +89,7 @@ export const homeFor = (role: schema.Role) => (role === "gate" ? "/gate" : "/ord
  */
 export async function requireUser(...roles: schema.Role[]): Promise<SessionUser> {
   const user = await currentUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/");
   if (roles.length && !roles.includes(user.role) && user.role !== "admin") redirect(homeFor(user.role));
   return user;
 }

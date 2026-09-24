@@ -1,25 +1,22 @@
 import Link from "next/link";
-import { currentUser } from "@/lib/session";
 import { getLocale, translator, type Key } from "@/lib/i18n";
 import { BRAND } from "@/lib/brand";
 import { LangSwitch } from "@/components/lang-switch";
-import { quickLogin } from "@/app/actions";
+
 
 export const dynamic = "force-dynamic";
 
-const PIN = "1111";
-
-const ROLES = [
-  { key: "dispatcher", phone: "+992900000001", href: "/board", tone: "badge-blue" },
-  { key: "dealer", phone: "+992900000002", href: "/orders", tone: "badge-green" },
-  { key: "gate", phone: "+992900000003", href: "/gate", tone: "badge-orange" },
-  { key: "scale", phone: "+992900000004", href: "/orders", tone: "badge-grey" },
+/* Входа нет: разделы открыты, карточки просто ведут на нужный экран. */
+const SECTIONS = [
+  { key: "dispatcher", href: "/board", tone: "badge-blue" },
+  { key: "dealer", href: "/orders/new", tone: "badge-green" },
+  { key: "gate", href: "/gate", tone: "badge-orange" },
+  { key: "scale", href: "/board", tone: "badge-grey" },
 ] as const;
 
 export default async function LandingPage() {
   const locale = await getLocale();
   const t = translator(locale);
-  const user = await currentUser();
 
   const before = ["lp.before.1", "lp.before.2", "lp.before.3", "lp.before.4", "lp.before.5"] as Key[];
   const after = ["lp.after.1", "lp.after.2", "lp.after.3", "lp.after.4", "lp.after.5"] as Key[];
@@ -36,8 +33,8 @@ export default async function LandingPage() {
             <p className="label hidden sm:block">{BRAND[locale].tagline}</p>
           </div>
           <LangSwitch current={locale} />
-          <Link href={user ? "/orders" : "/login"} className="btn btn-primary hidden sm:inline-flex">
-            {user ? t("nav.orders") : t("lp.hero.login")}
+          <Link href="/orders" className="btn hidden sm:inline-flex">
+            {t("lp.hero.login")}
           </Link>
         </div>
       </header>
@@ -47,9 +44,9 @@ export default async function LandingPage() {
           <h1 className="title max-w-3xl text-3xl sm:text-5xl">{t("lp.hero.title")}</h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted">{t("lp.hero.lead")}</p>
           <div className="mt-7 flex flex-wrap gap-3">
-            <a href="#roles" className="btn btn-brand text-lg">
+            <Link href="/orders/new" className="btn btn-brand text-lg">
               {t("lp.hero.cta")}
-            </a>
+            </Link>
             {/* Вход уже стоит в шапке; вторая такая же кнопка ничего не добавляет. */}
             <a href="#flow" className="btn text-lg">
               {t("lp.flow.title")}
@@ -90,7 +87,7 @@ export default async function LandingPage() {
           <p className="mt-3 max-w-2xl text-muted">{t("lp.roles.lead")}</p>
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {ROLES.map((role) => (
+            {SECTIONS.map((role) => (
               <article key={role.key} className="card flex flex-col p-6">
                 <span className={`badge ${role.tone} self-start`}>{t(`role.${role.key}` as Key)}</span>
 
@@ -105,13 +102,9 @@ export default async function LandingPage() {
                   </div>
                 </dl>
 
-                <form action={quickLogin} className="mt-5">
-                  <input type="hidden" name="phone" value={role.phone} />
-                  <input type="hidden" name="pin" value={PIN} />
-                  <button className="btn btn-primary w-full">
-                    {t("lp.roles.enter")} · {t(`role.${role.key}` as Key)}
-                  </button>
-                </form>
+                <Link href={role.href} className="btn btn-primary mt-5 w-full">
+                  {t("lp.roles.enter")}
+                </Link>
               </article>
             ))}
           </div>

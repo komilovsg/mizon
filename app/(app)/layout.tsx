@@ -5,7 +5,6 @@ import { getLocale, translator } from "@/lib/i18n";
 import { BRAND } from "@/lib/brand";
 import { LangSwitch } from "@/components/lang-switch";
 import { TabBar } from "@/components/tabbar";
-import { logout } from "@/app/actions";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await currentUser();
@@ -13,20 +12,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const locale = await getLocale();
   const t = translator(locale);
 
+  // Входа нет, ролей на экране тоже: все разделы открыты каждому.
   const links = [
-    { href: "/board", label: t("nav.board"), roles: ["dispatcher", "gate", "scale", "admin"] },
-    { href: "/orders", label: t("nav.orders"), roles: ["dealer", "dispatcher", "scale", "admin"] },
-    { href: "/gate", label: t("nav.gate"), roles: ["gate", "dispatcher", "admin"] },
-    { href: "/reports", label: t("nav.reports"), roles: ["dispatcher", "admin"] },
-    { href: "/dealers", label: t("nav.dealers"), roles: ["dispatcher", "admin"] },
-  ].filter((l) => l.roles.includes(user.role));
-
-  /*
-   * У дилера на экране должны остаться только кнопка и его заявки.
-   * Поэтому шапка сведена к названию и выходу, а переключатель языка убран вниз:
-   * язык выбирают один раз, а место вверху он занимал каждый раз.
-   */
-  const isDealer = user.role === "dealer";
+    { href: "/board", label: t("nav.board") },
+    { href: "/orders", label: t("nav.orders") },
+    { href: "/gate", label: t("nav.gate") },
+    { href: "/reports", label: t("nav.reports") },
+  ];
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -46,29 +38,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             ))}
           </nav>
 
-          {!isDealer && (
-            <span className="label ml-auto hidden truncate lg:inline">
-              {user.name}
-              {user.dealerName ? ` · ${user.dealerName}` : ""}
-            </span>
-          )}
-
-          <div className="ml-auto flex items-center gap-2 lg:ml-3">
-            {!isDealer && <LangSwitch current={locale} />}
-            <form action={logout}>
-              <button className="label px-2 py-2 hover:text-ink">{t("logout")}</button>
-            </form>
+          <div className="ml-auto flex items-center gap-2">
+            <LangSwitch current={locale} />
           </div>
         </div>
       </header>
 
       <main className="has-tabbar mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-5 sm:py-8">{children}</main>
-
-      {isDealer && (
-        <footer className="no-print mx-auto w-full max-w-6xl px-4 pb-8 sm:px-5">
-          <LangSwitch current={locale} />
-        </footer>
-      )}
 
       {links.length > 1 && <TabBar tabs={links.map(({ href, label }) => ({ href, label }))} />}
     </div>
