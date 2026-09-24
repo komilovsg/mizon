@@ -9,15 +9,8 @@ import { Badge, Gauge, orderTone } from "@/components/ui";
 export const dynamic = "force-dynamic";
 
 export default async function OrdersPage() {
-  const user = await requireUser();
+  await requireUser();
   const t = translator(await getLocale());
-
-  const ownDealer =
-    user.role === "dealer" && user.dealerId
-      ? await db.query.dealers.findFirst({ where: eq(schema.dealers.id, user.dealerId) })
-      : null;
-  const isDealer = user.role === "dealer";
-  const canOrder = !isDealer || ownDealer?.status === "active";
 
   const rows = await db
     .select({
@@ -28,60 +21,18 @@ export default async function OrdersPage() {
     })
     .from(schema.orders)
     .innerJoin(schema.dealers, eq(schema.orders.dealerId, schema.dealers.id))
-    .where(isDealer ? eq(schema.orders.dealerId, user.dealerId!) : sql`1=1`)
+
     .orderBy(desc(schema.orders.createdAt))
     .limit(100);
 
-  /*
-   * У дилера один сценарий — оставить заявку. Всё остальное на его экране
-   * только мешает, поэтому здесь кнопка во весь экран, а список под ней.
-   */
-  if (isDealer) {
-    return (
-      <>
-        {ownDealer && ownDealer.status !== "active" ? (
-          <p className="note note-warn">
-            {ownDealer.status === "pending" ? t("dealer.pendingNotice") : t("dealer.blockedNotice")}
-          </p>
-        ) : (
-          <Link href="/orders/new" className="btn btn-brand no-print block px-6 py-10 text-center text-3xl">
-            {t("dealer.newBig")}
-          </Link>
-        )}
-
-        {rows.length > 0 && (
-          <section className="mt-10">
-            <h2 className="title mb-3 text-lg">{t("dealer.myOrders")}</h2>
-            <ul className="space-y-2">
-              {rows.map(({ order }) => (
-                <li key={order.id}>
-                  <Link href={`/orders/${order.id}`} className="card flex flex-wrap items-center gap-x-4 gap-y-2 p-4">
-                    <span className="num text-lg font-bold">
-                      {order.tons} {t("t")}
-                    </span>
-                    <span className="min-w-0 flex-1 truncate">{order.destination}</span>
-                    <Badge label={t(`status.${order.status}` as never)} tone={orderTone(order.status)} />
-                    <span className="label w-full sm:w-auto">{fmtDateTime(order.createdAt)}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-      </>
-    );
-  }
-
   return (
     <>
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="title text-3xl">{t("nav.orders")}</h1>
-        {canOrder && (
-          <Link href="/orders/new" className="btn btn-brand no-print w-full sm:w-auto">
-            {t("nav.new")}
-          </Link>
-        )}
-      </div>
+      {/* Главное действие — создать заявку, поэтому кнопка занимает весь верх экрана. */}
+      <Link href="/orders/new" className="btn btn-brand no-print block px-6 py-8 text-center text-2xl sm:text-3xl">
+        {t("dealer.newBig")}
+      </Link>
+
+      <h2 className="title mt-10 mb-3 text-lg">{t("nav.orders")}</h2>
 
       {rows.length === 0 && <p className="text-muted">{t("order.empty")}</p>}
 
@@ -114,8 +65,9 @@ export default async function OrdersPage() {
                 </div>
 
                 <p className="label mt-3">
-                  <span className="mono">{order.number}</span> · {fmtDateTime(order.createdAt)} · {trucks}{" "}
-                  {t("trip.many").toLowerCase()}
+                  {/* «1 машины» режет глаз, поэтому число идёт после слова. */}
+                  <span className="mono">{order.number}</span> · {fmtDateTime(order.createdAt)} ·{" "}
+                  {t("trip.many")}: <span className="num">{trucks}</span>
                 </p>
               </Link>
             </li>
