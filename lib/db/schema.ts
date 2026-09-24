@@ -57,6 +57,9 @@ export const orders = sqliteTable(
     createdBy: integer("created_by").notNull().references(() => users.id),
     createdAt: integer("created_at").notNull().$defaultFn(now),
     channel: text("channel").$type<"web" | "phone">().notNull().default("web"),
+    // Кто именно оставил заявку. У фирмы-дилера звонить может любой из своих —
+    // имя из учётки не всегда совпадает с тем, кто отвечает за этот рейс.
+    contactName: text("contact_name"),
     productId: integer("product_id").references(() => products.id),
     // Название сохраняем копией: переименуют позицию в справочнике — старые накладные не поедут.
     product: text("product").notNull(),
@@ -80,6 +83,7 @@ export const trips = sqliteTable(
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
     orderId: integer("order_id").notNull().references(() => orders.id),
+    truckModel: text("truck_model"),                    // марка машины: КамАЗ, Howo, Shacman
     plate: text("plate").notNull(),                     // госномер тягача
     trailerPlate: text("trailer_plate"),
     driverName: text("driver_name").notNull(),

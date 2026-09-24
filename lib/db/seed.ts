@@ -21,12 +21,14 @@ async function main() {
   ]);
 
   // Замените на номенклатуру своего предприятия.
+  // Завод отгружает цемент. Остальные позиции заведены, но выключены:
+  // включить их — это правка справочника, а не кода.
   await db.insert(products).values([
-    { name: "Цемент М400", code1c: "N-0001", sortOrder: 10 },
-    { name: "Цемент М500", code1c: "N-0002", sortOrder: 20 },
-    { name: "Щебень фр. 5-20", code1c: "N-0010", sortOrder: 30 },
-    { name: "Песок строительный", code1c: "N-0011", sortOrder: 40 },
-    { name: "Известь", code1c: "N-0020", sortOrder: 50 },
+    { name: "Цемент М400", code1c: "N-0001", sortOrder: 10, active: true },
+    { name: "Цемент М500", code1c: "N-0002", sortOrder: 20, active: false },
+    { name: "Щебень фр. 5-20", code1c: "N-0010", sortOrder: 30, active: false },
+    { name: "Песок строительный", code1c: "N-0011", sortOrder: 40, active: false },
+    { name: "Известь", code1c: "N-0020", sortOrder: 50, active: false },
   ]);
 
   console.log("seed: ok");

@@ -36,267 +36,267 @@ body {
 
 h1, h2, h3 { font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
 
-.title { font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
-
-/* Подпись над значением. Раньше была 11px вразрядку и капсом — её просто не читали. */
-.label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-muted);
-}
-
-.card {
-  background: var(--color-card);
-  border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
-}
-
-/* Госномер остаётся «табличкой»: охрана сличает его с металлом на бампере. */
-.plate {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-family: var(--font-mono);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  background: #fff;
-  color: var(--color-ink);
-  border: 2px solid var(--color-ink);
-  border-radius: 8px;
-  padding: 0.25rem 0.625rem;
-  white-space: nowrap;
-}
-.plate::before {
-  content: "TJ";
-  font-size: 0.625rem;
-  background: var(--color-ink);
-  color: #fff;
-  border-radius: 3px;
-  padding: 0.0625rem 0.25rem;
-}
-.plate-lg { font-size: 1.375rem; padding: 0.375rem 0.875rem; }
-
-/* Состояние читается цветом раньше, чем текстом. */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4375rem;
-  border-radius: 999px;
-  padding: 0.3125rem 0.75rem;
-  font-size: 0.875rem;
-  font-weight: 700;
-  white-space: nowrap;
-}
-.badge::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: currentColor;
-  flex: none;
-}
-.badge-grey { background: #eff0ed; color: #5d645b; }
-.badge-orange { background: #fff0e6; color: #b23e00; }
-.badge-blue { background: #e8f0fe; color: #1b4fa8; }
-.badge-green { background: #e4f4ec; color: #0b6b45; }
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  font-family: inherit;
-  font-size: 1rem;
-  font-weight: 700;
-  border-radius: var(--radius-btn);
-  border: 2px solid transparent;
-  padding: 0.75rem 1.25rem;
-  background: #fff;
-  color: var(--color-ink);
-  box-shadow: inset 0 0 0 2px var(--color-line);
-  cursor: pointer;
-  /* 52px — палец в рабочей перчатке. */
-  min-height: 52px;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  transition: filter 120ms linear, box-shadow 120ms linear;
-}
-.btn:hover:not(:disabled) { box-shadow: inset 0 0 0 2px var(--color-ink); }
-.btn:active:not(:disabled) { transform: translateY(1px); }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-.btn-primary { background: var(--color-ink); color: #fff; box-shadow: none; }
-.btn-brand { background: var(--color-brand); color: #fff; box-shadow: none; }
-.btn-go { background: var(--color-go); color: #fff; box-shadow: none; }
-.btn-primary:hover:not(:disabled),
-.btn-brand:hover:not(:disabled),
-.btn-go:hover:not(:disabled) { filter: brightness(1.08); box-shadow: none; }
-
-/* Главное действие на КПП: промахнуться по нему невозможно. */
-.btn-xl { font-size: 1.25rem; min-height: 68px; width: 100%; padding: 1rem 1.5rem; }
-
-.field {
-  width: 100%;
-  background: #fff;
-  border: 2px solid var(--color-line);
-  border-radius: var(--radius-btn);
-  padding: 0.75rem 0.875rem;
-  font-family: inherit;
-  /* Ровно 16px и больше: всё, что мельче, заставляет Safari зумить страницу при фокусе. */
-  font-size: 17px;
-  min-height: 52px;
-  appearance: none;
-}
-.field:focus-visible { outline: none; border-color: var(--color-ink); box-shadow: 0 0 0 4px rgb(255 90 0 / 0.18); }
-.field-mono { font-family: var(--font-mono); letter-spacing: 0.04em; text-transform: uppercase; }
-
-:where(a, button, input, select, textarea, summary):focus-visible {
-  outline: 3px solid var(--color-brand);
-  outline-offset: 2px;
-  border-radius: 6px;
-}
-
-/* Цифры, которые читают глазами: обычный шрифт, ровные колонки. */
-.num { font-variant-numeric: tabular-nums; }
-/* Коды, которые сличают посимвольно: номер заявки, телефон, номер накладной. */
-.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
-
-.note {
-  border-radius: var(--radius-card);
-  padding: 0.875rem 1rem;
-  font-weight: 500;
-}
-.note-warn { background: #fff0e6; color: #8a3200; }
-.note-ok { background: #e4f4ec; color: #0b6b45; }
-
-/* Сколько из заявки уже увезли. Единственная шкала во всём интерфейсе. */
-.gauge { flex: 1; min-width: 0; height: 12px; border-radius: 999px; background: #eceee9; overflow: hidden; }
-.gauge > span { display: block; height: 100%; border-radius: 999px; background: var(--color-go); }
-
-.tabbar {
-  position: fixed;
-  inset: auto 0 0 0;
-  z-index: 20;
-  display: flex;
-  background: rgb(255 255 255 / 0.96);
-  backdrop-filter: blur(8px);
-  border-top: 1px solid var(--color-line);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-.tabbar a {
-  flex: 1;
-  min-height: 60px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.1875rem;
-  font-size: 0.8125rem;
-  font-weight: 700;
-  color: var(--color-muted);
-}
-.tabbar [aria-current="page"] { color: var(--color-brand); }
-.has-tabbar { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 1rem); }
-
-@media (min-width: 768px) {
-  .tabbar { display: none; }
-  .has-tabbar { padding-bottom: 2.5rem; }
-}
-
-/* Круглые тоннажи нажимаются одним касанием вместо клавиатуры. */
-.chip {
-  border: 2px solid var(--color-line);
-  border-radius: var(--radius-btn);
-  background: #fff;
-  min-height: 52px;
-  padding: 0 0.5rem;
-  font-family: var(--font-mono);
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  touch-action: manipulation;
-}
-.chip:hover { border-color: var(--color-ink); }
-.chip[aria-pressed="true"],
-.chip[aria-current="page"] { background: var(--color-ink); border-color: var(--color-ink); color: #fff; }
-
-@media print {
-  body { background: #fff; }
-  .no-print { display: none !important; }
-  .card { box-shadow: none; border: 1px solid #000; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  * { transition: none !important; animation: none !important; }
-}
-
-/* Доска: колонки-состояния, как в Trello. Горизонтальная прокрутка вместо переноса. */
-.board {
-  display: flex;
-  gap: 0.875rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-  scroll-snap-type: x proximity;
-  -webkit-overflow-scrolling: touch;
-}
-.board-col {
-  flex: 0 0 82vw;
-  max-width: 320px;
-  scroll-snap-align: start;
-  background: #ecedea;
-  border-radius: var(--radius-card);
-  padding: 0.75rem;
-  transition: background 120ms linear, box-shadow 120ms linear;
-}
-@media (min-width: 768px) {
-  .board-col { flex: 1 1 0; max-width: none; min-width: 240px; }
-}
-.board-col-over {
-  background: #e2eee8;
-  box-shadow: inset 0 0 0 2px var(--color-go);
-}
-.board-head {
-  font-size: 0.9375rem;
-  font-weight: 800;
-  padding: 0 0.25rem 0.75rem;
-}
-.board-card {
-  /* Вертикальную прокрутку пальцем оставляем, горизонтальный жест забираем себе. */
-  touch-action: pan-y;
-  user-select: none;
-  -webkit-user-select: none;
-  cursor: grab;
-}
-.board-card-ghost { opacity: 0.35; }
-.board-float {
-  position: fixed;
-  z-index: 50;
-  pointer-events: none;
-  transform: translate(-50%, -50%) rotate(2.5deg);
-  box-shadow: 0 12px 32px rgb(23 28 25 / 0.22);
-}
-
-/* График: столбики рисуем блоками, без библиотеки — одна серия и один разрез. */
-.chart-scroll { overflow-x: auto; }
-.chart-bars { display: flex; align-items: flex-end; gap: 4px; height: 180px; }
-.chart-col { flex: 1 1 0; min-width: 18px; display: flex; flex-direction: column; height: 100%; }
-.chart-track { flex: 1; display: flex; align-items: flex-end; }
-.chart-bar { width: 100%; border-radius: 4px 4px 0 0; transition: filter 120ms linear; }
-.chart-col:hover .chart-bar { filter: brightness(1.15); }
-.chart-tick { padding-top: 6px; text-align: center; font-size: 0.6875rem; color: var(--color-muted); }
-
-.chart-rowtrack { height: 10px; border-radius: 999px; background: #eceee9; overflow: hidden; }
-.chart-rowbar { height: 100%; border-radius: 999px; }
-
-.table-scroll { overflow-x: auto; }
-.data-table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
-.data-table th { text-align: left; font-size: 0.875rem; font-weight: 600; color: var(--color-muted); padding: 0 0.75rem 0.5rem 0; }
-.data-table td { padding: 0.625rem 0.75rem 0.625rem 0; border-top: 1px solid var(--color-line); }
-.data-table th:last-child, .data-table td:last-child { text-align: right; padding-right: 0; }
-
 /*
- * Компонентные классы вроде .btn задают display и перебивают утилиту hidden,
- * из-за чего скрытый элемент остаётся на экране. Возвращаем ей приоритет:
- * правило вне @layer сильнее любых утилит Tailwind.
+ * Компонентные классы живут в слое components: иначе .btn и .card задают display
+ * и перебивают утилиты Tailwind — block, hidden, flex просто перестают работать.
+ * Слой utilities объявлен позже, поэтому теперь утилита всегда побеждает.
  */
-.hidden { display: none; }
+@layer components {
+  .title { font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
+
+  /* Подпись над значением. Раньше была 11px вразрядку и капсом — её просто не читали. */
+  .label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-muted);
+  }
+
+  .card {
+    background: var(--color-card);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Госномер остаётся «табличкой»: охрана сличает его с металлом на бампере. */
+  .plate {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    background: #fff;
+    color: var(--color-ink);
+    border: 2px solid var(--color-ink);
+    border-radius: 8px;
+    padding: 0.25rem 0.625rem;
+    white-space: nowrap;
+  }
+  .plate::before {
+    content: "TJ";
+    font-size: 0.625rem;
+    background: var(--color-ink);
+    color: #fff;
+    border-radius: 3px;
+    padding: 0.0625rem 0.25rem;
+  }
+  .plate-lg { font-size: 1.375rem; padding: 0.375rem 0.875rem; }
+
+  /* Состояние читается цветом раньше, чем текстом. */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4375rem;
+    border-radius: 999px;
+    padding: 0.3125rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .badge::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    flex: none;
+  }
+  .badge-grey { background: #eff0ed; color: #5d645b; }
+  .badge-orange { background: #fff0e6; color: #b23e00; }
+  .badge-blue { background: #e8f0fe; color: #1b4fa8; }
+  .badge-green { background: #e4f4ec; color: #0b6b45; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    border-radius: var(--radius-btn);
+    border: 2px solid transparent;
+    padding: 0.75rem 1.25rem;
+    background: #fff;
+    color: var(--color-ink);
+    box-shadow: inset 0 0 0 2px var(--color-line);
+    cursor: pointer;
+    /* 52px — палец в рабочей перчатке. */
+    min-height: 52px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition: filter 120ms linear, box-shadow 120ms linear;
+  }
+  .btn:hover:not(:disabled) { box-shadow: inset 0 0 0 2px var(--color-ink); }
+  .btn:active:not(:disabled) { transform: translateY(1px); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-primary { background: var(--color-ink); color: #fff; box-shadow: none; }
+  .btn-brand { background: var(--color-brand); color: #fff; box-shadow: none; }
+  .btn-go { background: var(--color-go); color: #fff; box-shadow: none; }
+  .btn-primary:hover:not(:disabled),
+  .btn-brand:hover:not(:disabled),
+  .btn-go:hover:not(:disabled) { filter: brightness(1.08); box-shadow: none; }
+
+  /* Главное действие на КПП: промахнуться по нему невозможно. */
+  .btn-xl { font-size: 1.25rem; min-height: 68px; width: 100%; padding: 1rem 1.5rem; }
+
+  .field {
+    width: 100%;
+    background: #fff;
+    border: 2px solid var(--color-line);
+    border-radius: var(--radius-btn);
+    padding: 0.75rem 0.875rem;
+    font-family: inherit;
+    /* Ровно 16px и больше: всё, что мельче, заставляет Safari зумить страницу при фокусе. */
+    font-size: 17px;
+    min-height: 52px;
+    appearance: none;
+  }
+  .field:focus-visible { outline: none; border-color: var(--color-ink); box-shadow: 0 0 0 4px rgb(255 90 0 / 0.18); }
+  .field-mono { font-family: var(--font-mono); letter-spacing: 0.04em; text-transform: uppercase; }
+
+  :where(a, button, input, select, textarea, summary):focus-visible {
+    outline: 3px solid var(--color-brand);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  /* Цифры, которые читают глазами: обычный шрифт, ровные колонки. */
+  .num { font-variant-numeric: tabular-nums; }
+  /* Коды, которые сличают посимвольно: номер заявки, телефон, номер накладной. */
+  .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+
+  .note {
+    border-radius: var(--radius-card);
+    padding: 0.875rem 1rem;
+    font-weight: 500;
+  }
+  .note-warn { background: #fff0e6; color: #8a3200; }
+  .note-ok { background: #e4f4ec; color: #0b6b45; }
+
+  /* Сколько из заявки уже увезли. Единственная шкала во всём интерфейсе. */
+  .gauge { flex: 1; min-width: 0; height: 12px; border-radius: 999px; background: #eceee9; overflow: hidden; }
+  .gauge > span { display: block; height: 100%; border-radius: 999px; background: var(--color-go); }
+
+  .tabbar {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 20;
+    display: flex;
+    background: rgb(255 255 255 / 0.96);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid var(--color-line);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .tabbar a {
+    flex: 1;
+    min-height: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.1875rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--color-muted);
+  }
+  .tabbar [aria-current="page"] { color: var(--color-brand); }
+  .has-tabbar { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px) + 1rem); }
+
+  @media (min-width: 768px) {
+    .tabbar { display: none; }
+    .has-tabbar { padding-bottom: 2.5rem; }
+  }
+
+  /* Круглые тоннажи нажимаются одним касанием вместо клавиатуры. */
+  .chip {
+    border: 2px solid var(--color-line);
+    border-radius: var(--radius-btn);
+    background: #fff;
+    min-height: 52px;
+    padding: 0 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .chip:hover { border-color: var(--color-ink); }
+  .chip[aria-pressed="true"],
+  .chip[aria-current="page"] { background: var(--color-ink); border-color: var(--color-ink); color: #fff; }
+
+  @media print {
+    body { background: #fff; }
+    .no-print { display: none !important; }
+    .card { box-shadow: none; border: 1px solid #000; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+
+  /* Доска: колонки-состояния, как в Trello. Горизонтальная прокрутка вместо переноса. */
+  .board {
+    display: flex;
+    gap: 0.875rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+  .board-col {
+    flex: 0 0 82vw;
+    max-width: 320px;
+    scroll-snap-align: start;
+    background: #ecedea;
+    border-radius: var(--radius-card);
+    padding: 0.75rem;
+    transition: background 120ms linear, box-shadow 120ms linear;
+  }
+  @media (min-width: 768px) {
+    .board-col { flex: 1 1 0; max-width: none; min-width: 240px; }
+  }
+  .board-col-over {
+    background: #e2eee8;
+    box-shadow: inset 0 0 0 2px var(--color-go);
+  }
+  .board-head {
+    font-size: 0.9375rem;
+    font-weight: 800;
+    padding: 0 0.25rem 0.75rem;
+  }
+  .board-card {
+    /* Вертикальную прокрутку пальцем оставляем, горизонтальный жест забираем себе. */
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: grab;
+  }
+  .board-card-ghost { opacity: 0.35; }
+  .board-float {
+    position: fixed;
+    z-index: 50;
+    pointer-events: none;
+    transform: translate(-50%, -50%) rotate(2.5deg);
+    box-shadow: 0 12px 32px rgb(23 28 25 / 0.22);
+  }
+
+  /* График: столбики рисуем блоками, без библиотеки — одна серия и один разрез. */
+  .chart-scroll { overflow-x: auto; }
+  .chart-bars { display: flex; align-items: flex-end; gap: 4px; height: 180px; }
+  .chart-col { flex: 1 1 0; min-width: 18px; display: flex; flex-direction: column; height: 100%; }
+  .chart-track { flex: 1; display: flex; align-items: flex-end; }
+  .chart-bar { width: 100%; border-radius: 4px 4px 0 0; transition: filter 120ms linear; }
+  .chart-col:hover .chart-bar { filter: brightness(1.15); }
+  .chart-tick { padding-top: 6px; text-align: center; font-size: 0.6875rem; color: var(--color-muted); }
+
+  .chart-rowtrack { height: 10px; border-radius: 999px; background: #eceee9; overflow: hidden; }
+  .chart-rowbar { height: 100%; border-radius: 999px; }
+
+  .table-scroll { overflow-x: auto; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
+  .data-table th { text-align: left; font-size: 0.875rem; font-weight: 600; color: var(--color-muted); padding: 0 0.75rem 0.5rem 0; }
+  .data-table td { padding: 0.625rem 0.75rem 0.625rem 0; border-top: 1px solid var(--color-line); }
+  .data-table th:last-child, .data-table td:last-child { text-align: right; padding-right: 0; }
+}

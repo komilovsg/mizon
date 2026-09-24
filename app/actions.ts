@@ -162,7 +162,19 @@ const orderInput = z.object({
   productId: z.coerce.number().int().positive(),
   tons: z.coerce.number().int().min(1).max(500),
   destination: z.string().min(3).max(300),
+  contactName: z.string().max(120).optional(),
   note: z.string().max(500).optional(),
+});
+
+/**
+ * Машина в заявке дилера.
+ * Завод просил, чтобы дилер сразу писал, кто поедет: тогда на воротах
+ * охране остаётся сверить номер с металлом и нажать одну кнопку.
+ */
+const orderTruckInput = z.object({
+  truckModel: z.string().max(60).optional(),
+  plate: z.string().max(20).optional(),
+  driverName: z.string().max(120).optional(),
 });
 
 export async function createOrder(formData: FormData) {
@@ -172,7 +184,13 @@ export async function createOrder(formData: FormData) {
     productId: formData.get("productId"),
     tons: formData.get("tons"),
     destination: formData.get("destination"),
+    contactName: formData.get("contactName") || undefined,
     note: formData.get("note") || undefined,
+  });
+  const truck = orderTruckInput.parse({
+    truckModel: formData.get("truckModel") || undefined,
+    plate: formData.get("plate") || undefined,
+    driverName: formData.get("driverName") || undefined,
   });
 
   const product = await db.query.products.findFirst({ where: eq(schema.products.id, input.productId) });
@@ -192,6 +210,7 @@ export async function createOrder(formData: FormData) {
     .values({
       ...input,
       product: product.name,
+      contactName: input.contactName ?? user.name,
       note: input.note ?? null,
       number: orderNumber(count + 1),
       createdBy: user.id,
@@ -204,8 +223,23 @@ export async function createOrder(formData: FormData) {
     .returning();
 
   await log(user, "order", order.id, "created");
+
+  // Дилер указал машину прямо в заявке — заводим рейс сразу, не дожидаясь ворот.
+  if (truck.plate && truck.driverName) {
+    const [trip] = await db
+      .insert(schema.trips)
+      .values({
+        orderId: order.id,
+        plate: normalizePlate(truck.plate),
+        truckModel: truck.truckModel ?? null,
+        driverName: truck.driverName,
+      })
+      .returning();
+    await log(user, "trip", trip.id, "created", { plate: trip.plate, via: "order" });
+  }
+
   if (order.status === "approved") await enqueueOrder(order.id);
-  redirect(`/orders/${order.id}`);
+  redirect(`/orders/${order.id}${user.role === "dealer" ? "?created=1" : ""}`);
 }
 
 async function enqueueOrder(orderId: number) {
@@ -245,6 +279,7 @@ export async function decideOrder(formData: FormData) {
 
 const tripInput = z.object({
   orderId: z.coerce.number().int().positive(),
+  truckModel: z.string().max(60).optional(),
   plate: z.string().min(3).max(20).transform(normalizePlate),
   trailerPlate: z.string().max(20).transform(normalizePlate).optional(),
   driverName: z.string().min(3).max(120),
@@ -257,6 +292,7 @@ export async function addTrip(formData: FormData) {
   const user = await requireUser("dispatcher", "gate", "dealer");
   const input = tripInput.parse({
     orderId: formData.get("orderId"),
+    truckModel: formData.get("truckModel") || undefined,
     plate: formData.get("plate"),
     trailerPlate: formData.get("trailerPlate") || undefined,
     driverName: formData.get("driverName"),
@@ -270,6 +306,7 @@ export async function addTrip(formData: FormData) {
     .insert(schema.trips)
     .values({
       ...input,
+      truckModel: input.truckModel ?? null,
       trailerPlate: input.trailerPlate ?? null,
       driverPhone: input.driverPhone ?? null,
       driverDoc: input.driverDoc ?? null,

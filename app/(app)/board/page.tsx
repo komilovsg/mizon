@@ -31,6 +31,7 @@ export default async function BoardPage() {
     orderId: r.trip.orderId,
     plate: r.trip.plate,
     driverName: r.trip.driverName,
+    truckModel: r.trip.truckModel,
     dealer: r.dealer,
     destination: r.destination,
     orderNumber: r.orderNumber,

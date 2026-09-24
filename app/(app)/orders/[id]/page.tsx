@@ -10,10 +10,17 @@ import { addTrip, closeOrder, decideOrder, gateOut, saveWeight } from "@/app/act
 
 export const dynamic = "force-dynamic";
 
-export default async function OrderPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function OrderPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ created?: string }>;
+}) {
   const user = await requireUser();
   const t = translator(await getLocale());
   const id = Number((await params).id);
+  const justCreated = (await searchParams).created === "1";
 
   const order = await db.query.orders.findFirst({ where: eq(schema.orders.id, id) });
   if (!order) notFound();
@@ -31,6 +38,17 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
       <Link href="/orders" className="label no-print hover:text-ink">
         ← {t("back")}
       </Link>
+
+      {/* Дилер только что отправил заявку — подтверждаем, что она дошла. */}
+      {justCreated && (
+        <div className="note note-ok mt-3">
+          <p className="title text-lg">{t("order.sent")}</p>
+          <p className="mt-1">{t("order.sentBody")}</p>
+          <Link href="/orders/new" className="btn btn-go no-print mt-4">
+            {t("order.newAgain")}
+          </Link>
+        </div>
+      )}
 
       <article className="card mt-3 p-5 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
@@ -52,6 +70,12 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
             <dt className="label">{t("order.destination")}</dt>
             <dd className="mt-0.5 leading-snug">{order.destination}</dd>
           </div>
+          {order.contactName && (
+            <div>
+              <dt className="label">{t("order.contact")}</dt>
+              <dd className="mt-0.5 leading-snug">{order.contactName}</dd>
+            </div>
+          )}
         </dl>
 
         <div className="mt-6">
@@ -93,6 +117,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                 <Badge label={t(`trip.status.${trip.status}` as never)} tone={tripTone(trip.status)} />
               </div>
               <p className="mt-3 text-lg leading-snug font-bold">{trip.driverName}</p>
+              {trip.truckModel && <p className="text-muted">{trip.truckModel}</p>}
 
               <div className="label mt-2 flex flex-wrap gap-x-5 gap-y-1">
                 {trip.arrivedAt && (
@@ -164,8 +189,8 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
                     placeholder="2701AB01"
                   />
                 </Field>
-                <Field label={t("trip.trailer")}>
-                  <input name="trailerPlate" autoCapitalize="characters" autoCorrect="off" spellCheck={false} className="field field-mono text-xl" />
+                <Field label={t("trip.model")}>
+                  <input name="truckModel" maxLength={60} className="field" placeholder={t("trip.model.hint")} />
                 </Field>
                 <Field label={t("trip.driver")}>
                   <input name="driverName" required autoComplete="name" className="field" />

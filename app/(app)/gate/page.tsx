@@ -148,7 +148,9 @@ function TripCard({ row, t, big }: { row: Row; t: T; big?: boolean }) {
         <Badge label={t(`trip.status.${trip.status}` as never)} tone={tripTone(trip.status)} />
       </div>
 
-      <p className="mt-3 text-lg leading-snug font-bold">{trip.driverName}</p>
+      {/* Марка помогает сверить карточку с тем, что реально стоит у ворот. */}
+      {trip.truckModel && <p className="mt-2.5 font-semibold">{trip.truckModel}</p>}
+      <p className="mt-1 text-lg leading-snug font-bold">{trip.driverName}</p>
       <p className="mt-1 text-muted">
         {row.dealer} → {row.destination}
       </p>

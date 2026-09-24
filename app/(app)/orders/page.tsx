@@ -16,7 +16,8 @@ export default async function OrdersPage() {
     user.role === "dealer" && user.dealerId
       ? await db.query.dealers.findFirst({ where: eq(schema.dealers.id, user.dealerId) })
       : null;
-  const canOrder = user.role !== "dealer" || ownDealer?.status === "active";
+  const isDealer = user.role === "dealer";
+  const canOrder = !isDealer || ownDealer?.status === "active";
 
   const rows = await db
     .select({
@@ -27,26 +28,60 @@ export default async function OrdersPage() {
     })
     .from(schema.orders)
     .innerJoin(schema.dealers, eq(schema.orders.dealerId, schema.dealers.id))
-    .where(user.role === "dealer" ? eq(schema.orders.dealerId, user.dealerId!) : sql`1=1`)
+    .where(isDealer ? eq(schema.orders.dealerId, user.dealerId!) : sql`1=1`)
     .orderBy(desc(schema.orders.createdAt))
     .limit(100);
+
+  /*
+   * У дилера один сценарий — оставить заявку. Всё остальное на его экране
+   * только мешает, поэтому здесь кнопка во весь экран, а список под ней.
+   */
+  if (isDealer) {
+    return (
+      <>
+        {ownDealer && ownDealer.status !== "active" ? (
+          <p className="note note-warn">
+            {ownDealer.status === "pending" ? t("dealer.pendingNotice") : t("dealer.blockedNotice")}
+          </p>
+        ) : (
+          <Link href="/orders/new" className="btn btn-brand no-print block px-6 py-10 text-center text-3xl">
+            {t("dealer.newBig")}
+          </Link>
+        )}
+
+        {rows.length > 0 && (
+          <section className="mt-10">
+            <h2 className="title mb-3 text-lg">{t("dealer.myOrders")}</h2>
+            <ul className="space-y-2">
+              {rows.map(({ order }) => (
+                <li key={order.id}>
+                  <Link href={`/orders/${order.id}`} className="card flex flex-wrap items-center gap-x-4 gap-y-2 p-4">
+                    <span className="num text-lg font-bold">
+                      {order.tons} {t("t")}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate">{order.destination}</span>
+                    <Badge label={t(`status.${order.status}` as never)} tone={orderTone(order.status)} />
+                    <span className="label w-full sm:w-auto">{fmtDateTime(order.createdAt)}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+      </>
+    );
+  }
 
   return (
     <>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="title text-3xl">{t("nav.orders")}</h1>
-        {canOrder && ["dealer", "dispatcher", "admin"].includes(user.role) && (
+        {canOrder && (
           <Link href="/orders/new" className="btn btn-brand no-print w-full sm:w-auto">
             {t("nav.new")}
           </Link>
         )}
       </div>
-
-      {ownDealer && ownDealer.status !== "active" && (
-        <p className="note note-warn mb-6">
-          {ownDealer.status === "pending" ? t("dealer.pendingNotice") : t("dealer.blockedNotice")}
-        </p>
-      )}
 
       {rows.length === 0 && <p className="text-muted">{t("order.empty")}</p>}
 

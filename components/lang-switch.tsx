@@ -9,7 +9,7 @@ export function LangSwitch({ current }: { current: Locale }) {
           key={l}
           name="locale"
           value={l}
-          className={`px-2.5 py-1 text-xs tracking-widest uppercase ${
+          className={`px-2.5 py-1 text-xs whitespace-nowrap tracking-widest uppercase ${
             l === current ? "bg-ink text-white" : "text-muted hover:text-ink"
           }`}
           aria-current={l === current}

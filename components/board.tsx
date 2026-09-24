@@ -11,6 +11,7 @@ export type BoardCard = {
   orderId: number;
   plate: string;
   driverName: string;
+  truckModel: string | null;
   dealer: string;
   destination: string;
   orderNumber: string;
@@ -149,7 +150,8 @@ function CardBody({ card, labels, floating }: { card: BoardCard; labels: Labels;
         <span className="label num">{card.time}</span>
       </div>
 
-      <p className="mt-2.5 leading-snug font-bold">{card.driverName}</p>
+      {card.truckModel && <p className="mt-2 text-sm font-semibold">{card.truckModel}</p>}
+      <p className="mt-1 leading-snug font-bold">{card.driverName}</p>
       <p className="mt-1 text-sm text-muted">{card.dealer}</p>
       <p className="mt-1 text-sm leading-snug">{card.destination}</p>
 
