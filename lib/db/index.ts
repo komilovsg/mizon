@@ -8,21 +8,25 @@ import * as schema from "./schema";
  * Диалект тот же SQLite, поэтому схема и запросы не меняются.
  */
 
-// Пустая строка — это не «не задано», а «задано неправильно»: переменную в панели
-// хостинга создали, а значение вставить забыли. Без trim такой случай уходит
-// вглубь драйвера и всплывает невнятным URL_INVALID уже на первом запросе.
-const tursoUrl = process.env.TURSO_DATABASE_URL?.trim();
-const tursoToken = process.env.TURSO_AUTH_TOKEN?.trim();
+/*
+ * MIZON_DB_* важнее TURSO_*.
+ * Интеграция Turso в Vercel подставляет в TURSO_DATABASE_URL адрес ветки,
+ * созданной под конкретный деплой: у неё свой снимок данных, и всё, что внесли
+ * пользователи, остаётся в старой ветке после следующей выкладки.
+ * Свои переменные интеграция не трогает, поэтому постоянную базу задаём через них.
+ */
+const tursoUrl = (process.env.MIZON_DB_URL || process.env.TURSO_DATABASE_URL)?.trim();
+const tursoToken = (process.env.MIZON_DB_TOKEN || process.env.TURSO_AUTH_TOKEN)?.trim();
 
 if (tursoToken && !tursoUrl) {
-  throw new Error("Задан TURSO_AUTH_TOKEN, но TURSO_DATABASE_URL пуст. Впишите адрес базы вида libsql://…turso.io");
+  throw new Error("Задан токен базы, но её адрес пуст. Впишите MIZON_DB_URL вида libsql://…turso.io");
 }
 if (tursoUrl && !tursoToken) {
-  throw new Error("Задан TURSO_DATABASE_URL, но TURSO_AUTH_TOKEN пуст. Создайте токен с правом Read & Write.");
+  throw new Error("Задан адрес базы, но токен пуст. Создайте токен с правом Read & Write и впишите MIZON_DB_TOKEN.");
 }
 if (!tursoUrl && process.env.VERCEL) {
   throw new Error(
-    "Нет подключения к Turso: TURSO_DATABASE_URL и TURSO_AUTH_TOKEN пусты. " +
+    "Нет подключения к базе: MIZON_DB_URL и TURSO_DATABASE_URL пусты. " +
       "Файловая база на Vercel не работает — её стирает каждый деплой.",
   );
 }

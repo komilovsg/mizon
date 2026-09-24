@@ -15,14 +15,18 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
-  const url = process.env.TURSO_DATABASE_URL?.trim();
-  const token = process.env.TURSO_AUTH_TOKEN?.trim();
+  const pinned = !!process.env.MIZON_DB_URL?.trim();
+  const url = (process.env.MIZON_DB_URL || process.env.TURSO_DATABASE_URL)?.trim();
+  const token = (process.env.MIZON_DB_TOKEN || process.env.TURSO_AUTH_TOKEN)?.trim();
 
   const env = {
     // Адрес базы не секрет: без токена он бесполезен, а видеть его нужно,
     // чтобы не гадать, к какой именно базе подключён хостинг.
-    TURSO_DATABASE_URL: url ? `${url} (${url.length} символов)` : "ПУСТО",
-    TURSO_AUTH_TOKEN: token ? `задан, ${token.length} символов` : "ПУСТО",
+    база: url ? `${url} (${url.length} символов)` : "ПУСТО",
+    источник: pinned
+      ? "MIZON_DB_URL — постоянная база"
+      : "TURSO_DATABASE_URL — ветка деплоя, данные не переживут выкладку",
+    токен: token ? `задан, ${token.length} символов` : "ПУСТО",
     SESSION_SECRET: process.env.SESSION_SECRET?.trim() ? "задан" : "ПУСТО — сессии на значении по умолчанию",
     runtime: process.env.VERCEL ? "vercel" : "локально",
   };
